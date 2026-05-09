@@ -1,0 +1,52 @@
+<div class="landing">
+
+  <!-- Background grid decoration -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- Nav omitted as requested -->
+
+  <!-- Hero -->
+  <section class="hero" #hero>
+    <a href="#" class="animate tag" (click)="$event.preventDefault()">
+      Angular Version History
+    </a>
+
+    <h1 class="animate headline">
+      The web development framework for <br/>
+      <span class="gradient-text">building modern galleries.</span>
+    </h1>
+
+    <p class="animate description">
+      Walk through every major Angular release — from v2 to v22.<br>
+      An immersive 3D journey through the evolution of the framework.
+    </p>
+
+    <div class="animate action-group">
+      <button class="cta-btn primary" (click)="enterGallery()">
+        Enter Gallery
+        <svg class="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <a href="https://angular.dev/docs" target="_blank" class="cta-btn secondary">
+        Read docs
+      </a>
+    </div>
+  </section>
+
+  <!-- Features Cards similar to Angular.dev -->
+  <section class="features-grid">
+    <div class="animate feature-card">
+      <h3>Versions v2–v22</h3>
+      <p>Explore the complete history of Angular versions in a single immersive environment.</p>
+    </div>
+    <div class="animate feature-card">
+      <h3>Immersive 3D</h3>
+      <p>Built with Angular 21 Signals and Three.js for a reactive, fine-grained 3D experience.</p>
+    </div>
+    <div class="animate feature-card">
+      <h3>WebGPU Powered</h3>
+      <p>Next-gen rendering capabilities for high-performance graphics and smooth frame rates.</p>
+    </div>
+  </section>
+
+</div>

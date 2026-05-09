@@ -1,0 +1,50 @@
+@if (gallery.selectedArtwork(); as artwork) {
+  <div class="modal-overlay" (click)="close($event)">
+    <div
+      #container
+      class="modal-card"
+      (click)="stopPropagation($event)"
+    >
+      <!-- Image Panel -->
+      <div class="modal-image-panel">
+        <img
+          [src]="artwork.imageUrl"
+          [alt]="artwork.title"
+          class="modal-image"
+          [class.coming-soon-img]="artwork.comingSoon"
+        />
+        @if (artwork.comingSoon) {
+          <span class="soon-badge">Coming Soon</span>
+        }
+      </div>
+
+      <!-- Info Panel -->
+      <div class="modal-info-panel">
+        <button class="close-btn" (click)="close($event)">&#x2715;</button>
+
+        <div class="modal-header">
+          <h2 class="modal-title">{{ artwork.title }}</h2>
+          @if (artwork.releaseDate) {
+            <span class="release-badge">{{ artwork.releaseDate }}</span>
+          }
+        </div>
+        <div class="modal-divider"></div>
+        <p class="modal-description">{{ artwork.description }}</p>
+
+        @if (artwork.features?.length) {
+          <ul class="features-list">
+            @for (f of artwork.features; track f) {
+              <li class="feature-item">{{ f }}</li>
+            }
+          </ul>
+        }
+
+        <div class="modal-actions">
+          <a class="btn-primary btn-link" [href]="artwork.docsUrl" target="_blank" rel="noopener">
+            {{ artwork.docsUrl.replace('https://', '').replace('/', '') }} ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+}

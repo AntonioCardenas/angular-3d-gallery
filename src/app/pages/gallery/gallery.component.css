@@ -1,0 +1,251 @@
+.gallery-root {
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
+  background: #FAFAFA;
+  overflow: hidden;
+  position: relative;
+}
+
+.scene-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.ui-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.instructions-card {
+  position: relative;
+  color: #fff;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2.5rem 2rem 2rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  cursor: default;
+  min-width: 320px;
+}
+
+.back-link {
+  position: absolute;
+  top: 1rem;
+  left: 1.25rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+  user-select: none;
+}
+
+.back-link:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.instructions-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.025em;
+}
+
+.instructions-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.instructions-subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.instructions-hints {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  padding-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hint-badge {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.instructions-settings {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  pointer-events: auto;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.toggle-btn.active {
+  background: rgba(0, 255, 128, 0.12);
+  border-color: rgba(0, 255, 128, 0.4);
+  color: #00ff80;
+}
+
+.toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Audio Settings ─────────────────────── */
+.audio-settings {
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.audio-toggles {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.volume-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+.volume-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.volume-slider {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  transition: transform 0.1s;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ── Lighting panel ─────────────────────── */
+.lighting-panel {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.settings-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.lighting-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.light-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0.32rem 0.75rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 500;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  pointer-events: auto;
+}
+
+.light-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.light-btn.active {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-weight: 600;
+}
+
+.light-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px currentColor;
+}

@@ -1,0 +1,104 @@
+<main class="gallery-root" (touchstart)="isMobile() ? handleFirstTouch() : null">
+  <!-- 3D Scene Layer -->
+  <div class="scene-layer">
+    <app-scene />
+  </div>
+
+  <!-- UI Layer — visible on start screen only -->
+  @if (!(isMobile() ? mobileStarted() : input.isLocked())) {
+  <div class="ui-layer" (click)="startExplore()">
+    <div #instructions class="instructions-card">
+
+      <!-- Back link -->
+      <a class="back-link" (click)="exitGallery(); $event.stopPropagation()" (keydown.enter)="exitGallery()" tabindex="0">
+        ← Back
+      </a>
+
+      <h1 class="instructions-title">Immersive Digital Art Gallery</h1>
+      <div class="instructions-body">
+        <p class="instructions-subtitle">
+          @if (isMobile()) {
+          Use the joysticks to explore
+          } @else {
+          Click anywhere to explore
+          }
+        </p>
+        <div class="instructions-hints">
+          @if (isMobile()) {
+          <span class="hint-badge">Left stick to Move</span>
+          <span class="hint-badge">Right stick to Look</span>
+          } @else {
+          <span class="hint-badge">WASD to Move</span>
+          <span class="hint-badge">Mouse to Look</span>
+          }
+        </div>
+
+        <!-- Lighting presets (all platforms) -->
+        <div class="lighting-panel">
+          <span class="settings-label">Lighting</span>
+          <div class="lighting-grid">
+            @for (p of lighting.presets; track p.id) {
+              <button class="light-btn" [class.active]="lighting.activeId() === p.id"
+                (click)="lighting.setPreset(p.id); $event.stopPropagation()">
+                <span class="light-dot" [style.background]="p.dotColor"></span>
+                {{ p.name }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Audio settings (all platforms) -->
+        <div class="instructions-settings audio-settings">
+          <div class="audio-toggles">
+            <button class="toggle-btn" [class.active]="audio.ambientMusicEnabled()"
+              (click)="audio.toggleAmbientMusic(); $event.stopPropagation()">
+              Music: {{ audio.ambientMusicEnabled() ? 'ON' : 'OFF' }}
+            </button>
+            <button class="toggle-btn" [class.active]="audio.stepSoundEnabled()"
+              (click)="audio.toggleStepSound(); $event.stopPropagation()">
+              Steps: {{ audio.stepSoundEnabled() ? 'ON' : 'OFF' }}
+            </button>
+          </div>
+          
+          <div class="volume-control" (click)="$event.stopPropagation()">
+            <span class="volume-label">Vol: {{ audio.volume() }}%</span>
+            <input type="range" min="0" max="100" [value]="audio.volume()" 
+              (input)="onVolumeChange($event)" class="volume-slider">
+          </div>
+        </div>
+
+        <!-- Settings (desktop only) -->
+        @if (!isMobile()) {
+        <div class="instructions-settings">
+          <button class="toggle-btn" [class.active]="settings.useWebGPU()" [disabled]="!settings.webGPUSupported()"
+            (click)="settings.toggleWebGPU(); $event.stopPropagation()">
+            @if (!settings.webGPUSupported()) {
+            WebGPU: Not Supported
+            } @else if (settings.useWebGPU() && settings.webGPUActive()) {
+            WebGPU: ON (Active)
+            } @else if (settings.useWebGPU()) {
+            WebGPU: ON (Loading...)
+            } @else {
+            WebGPU: OFF
+            }
+          </button>
+          <button class="toggle-btn" [class.active]="settings.showFPS()"
+            (click)="settings.toggleFPS(); $event.stopPropagation()">
+            FPS Debug: {{ settings.showFPS() ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Mobile Controls -->
+  @if (isMobile()) {
+  <app-mobile-controls />
+  <app-look-joystick />
+  }
+
+  <!-- Gallery Modal -->
+  <app-gallery-modal />
+</main>

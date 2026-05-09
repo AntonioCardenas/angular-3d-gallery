@@ -1,0 +1,22 @@
+<div class="joystick-wrapper" [class.joystick-left]="side() === 'left'" [class.joystick-right]="side() === 'right'">
+  <div
+    #base
+    class="joystick-base"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd($event)"
+    (touchcancel)="onTouchEnd($event)"
+  >
+    <!-- Inner ring decoration -->
+    <div class="joystick-ring"></div>
+
+    <!-- Crosshair decoration -->
+    <div class="joystick-crosshair">
+      <div class="crosshair-h"></div>
+      <div class="crosshair-v"></div>
+    </div>
+
+    <!-- Knob -->
+    <div #knob class="joystick-knob"></div>
+  </div>
+</div>

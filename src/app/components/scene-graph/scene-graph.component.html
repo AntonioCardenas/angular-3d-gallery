@@ -1,0 +1,88 @@
+<!-- Lighting -->
+<ngt-ambient-light [color]="lighting.ambientColor()" [intensity]="lighting.ambientIntensity()" />
+<ngt-directional-light [color]="lighting.dirColor()" [intensity]="lighting.dirIntensity()" [position]="[5, 10, 5]" />
+
+<!-- Environment textures loaded — render gallery -->
+@if (floorTex() && wallTex() && ceilTex()) {
+  <ngt-group>
+    <!-- Floor -->
+    <ngt-mesh [rotation]="[-Math.PI / 2, 0, 0]" [position]="[0, 0, 0]" [receiveShadow]="true">
+      <ngt-plane-geometry *args="[40, 6]" />
+      <ngt-mesh-basic-material [map]="floorTex()" />
+    </ngt-mesh>
+
+    <!-- Ceiling -->
+    <ngt-mesh [rotation]="[Math.PI / 2, 0, 0]" [position]="[0, 6, 0]">
+      <ngt-plane-geometry *args="[40, 6]" />
+      <ngt-mesh-basic-material [map]="ceilTex()" />
+    </ngt-mesh>
+
+    <!-- Walls group -->
+    <ngt-group [position]="[0, 3, 0]">
+      <!-- Back Wall -->
+      <ngt-mesh [position]="[0, 0, -3]">
+        <ngt-box-geometry *args="[40, 6, 0.001]" />
+        <ngt-mesh-basic-material [map]="wallTex()" />
+      </ngt-mesh>
+      <!-- Left Wall — AngularJS heritage -->
+      <ngt-mesh [position]="[-20, 0, 0]" [rotation]="[0, Math.PI / 2, 0]">
+        <ngt-box-geometry *args="[6, 6, 0.001]" />
+        <ngt-mesh-basic-material [map]="leftWallTex" />
+      </ngt-mesh>
+      <!-- Right Wall — contributor credits -->
+      <ngt-mesh [position]="[20, 0, 0]" [rotation]="[0, -Math.PI / 2, 0]">
+        <ngt-box-geometry *args="[6, 6, 0.001]" />
+        <ngt-mesh-basic-material [map]="rightWallTex" />
+      </ngt-mesh>
+      <!-- Front Wall -->
+      <ngt-mesh [position]="[0, 0, 3]" [rotation]="[0, Math.PI, 0]">
+        <ngt-box-geometry *args="[40, 6, 0.001]" />
+        <ngt-mesh-basic-material [map]="wallTex()" />
+      </ngt-mesh>
+    </ngt-group>
+
+    <!-- Featured Art Walls — match the side-wall textures -->
+    <ngt-mesh [position]="[-19.9, 3, 0]" [rotation]="[0, Math.PI / 2, 0]">
+      <ngt-plane-geometry *args="[5, 5]" />
+      <ngt-mesh-basic-material [map]="leftWallTex" />
+    </ngt-mesh>
+    <ngt-mesh [position]="[19.9, 3, 0]" [rotation]="[0, -Math.PI / 2, 0]">
+      <ngt-plane-geometry *args="[5, 5]" />
+      <ngt-mesh-basic-material [map]="rightWallTex" />
+    </ngt-mesh>
+
+    <!-- Paintings -->
+    @for (p of paintings; track p.id) {
+      @if (paintingTextures()[p.id]) {
+        <ngt-group
+          [position]="p.position"
+          [rotation]="p.rotation"
+          (pointerup)="onPaintingClick($event, p, p.id)"
+          (pointerover)="hoveredId.set(p.id)"
+          (pointerout)="hoveredId.set(null)"
+        >
+          <!-- Glow/Outline when hovered -->
+          <ngt-mesh [position]="[0, 0, -0.01]" [visible]="hoveredId() === p.id">
+            <ngt-plane-geometry *args="[getPaintingWidth(paintingTextures()[p.id]) + 0.2, getPaintingHeight(paintingTextures()[p.id]) + 0.2]" />
+            <ngt-mesh-basic-material [color]="p.comingSoon ? '#00aaff' : '#c315a8'" [transparent]="true" [opacity]="0.5" [toneMapped]="false" />
+          </ngt-mesh>
+
+          <!-- Painting mesh -->
+          <ngt-mesh>
+            <ngt-box-geometry *args="[getPaintingWidth(paintingTextures()[p.id]), getPaintingHeight(paintingTextures()[p.id]), 0.09]" />
+            <ngt-mesh-basic-material [map]="paintingTextures()[p.id]" [opacity]="p.comingSoon ? 0.55 : 1" [transparent]="p.comingSoon" />
+          </ngt-mesh>
+        </ngt-group>
+      }
+    }
+  </ngt-group>
+}
+
+<!-- Desktop: Pointer Lock Controls -->
+@if (device.isMobile() === false) {
+  <ngts-pointer-lock-controls
+    [options]="plcOptions"
+    (lock)="onLock()"
+    (unlock)="onUnlock()"
+  />
+}
