@@ -2,6 +2,7 @@ import {
   Component,
   inject,
   signal,
+  effect,
   ElementRef,
   viewChild,
   AfterViewInit,
@@ -17,6 +18,7 @@ import { DeviceService } from '../../services/device.service';
 import { SettingsService } from '../../services/settings.service';
 import { AudioService } from '../../services/audio.service';
 import { LightingService } from '../../services/lighting.service';
+import { LoadingService } from '../../services/loading.service';
 import gsap from 'gsap';
 
 @Component({
@@ -41,8 +43,24 @@ export class GalleryComponent implements AfterViewInit {
   protected isMobile = this.device.isMobile;
   private router = inject(Router);
 
+  protected loading = inject(LoadingService);
   private instructionsRef = viewChild<ElementRef<HTMLDivElement>>('instructions');
+  private preloaderRef = viewChild<ElementRef<HTMLDivElement>>('preloader');
   protected mobileStarted = signal(false);
+  protected preloaderHidden = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.loading.isLoaded()) {
+        const el = this.preloaderRef()?.nativeElement;
+        if (el) {
+          gsap.to(el, { opacity: 0, duration: 0.7, ease: 'power2.in', onComplete: () => this.preloaderHidden.set(true) });
+        } else {
+          this.preloaderHidden.set(true);
+        }
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     const el = this.instructionsRef()?.nativeElement;

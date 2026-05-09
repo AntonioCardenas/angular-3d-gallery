@@ -28,6 +28,7 @@ import { InputService } from '../../services/input.service';
 import { DeviceService } from '../../services/device.service';
 import { AudioService } from '../../services/audio.service';
 import { LightingService } from '../../services/lighting.service';
+import { LoadingService } from '../../services/loading.service';
 import { NgtArgs } from 'angular-three';
 
 extend({
@@ -108,7 +109,6 @@ export class SceneGraphComponent {
   protected wallTex = signal<any>(null);
   protected ceilTex = signal<any>(null);
   protected paintingTextures = signal<any[]>([]);
-
   // Hover state for each painting
   protected hoveredId = signal<number | null>(null);
 
@@ -136,7 +136,7 @@ export class SceneGraphComponent {
     isBottomRow: i < HALF,
     position: (i < HALF
       ? [SPACING * i - SPREAD, 2.6, -2.96]
-      : [SPACING * (i - HALF) - SPREAD, 2.6, 2.96]) as [number, number, number],
+      : [SPACING * (HALF - 1 - (i - HALF)) - SPREAD, 2.6, 2.96]) as [number, number, number],
     rotation: (i < HALF
       ? [0, 0, 0]
       : [0, Math.PI, 0]) as [number, number, number],
@@ -157,6 +157,16 @@ export class SceneGraphComponent {
 
   protected readonly Math = Math;
 
+  private loading = inject(LoadingService);
+  private texturesLoaded = 0;
+  private readonly TOTAL_TEXTURES = 3 + PAINTING_COUNT;
+
+  private onTextureLoaded(): void {
+    if (++this.texturesLoaded === this.TOTAL_TEXTURES) {
+      this.loading.isLoaded.set(true);
+    }
+  }
+
   constructor() {
     const loader = new TextureLoader();
 
@@ -166,6 +176,7 @@ export class SceneGraphComponent {
       t.repeat.set(3, 1);
       t.needsUpdate = true;
       this.floorTex.set(t);
+      this.onTextureLoaded();
     });
 
     loader.load('/asset/wall.jpg', (t) => {
@@ -173,6 +184,7 @@ export class SceneGraphComponent {
       t.repeat.set(1, 1);
       t.needsUpdate = true;
       this.wallTex.set(t);
+      this.onTextureLoaded();
     });
 
     loader.load('/asset/ceil.jpg', (t) => {
@@ -180,6 +192,7 @@ export class SceneGraphComponent {
       t.repeat.set(3, 1);
       t.needsUpdate = true;
       this.ceilTex.set(t);
+      this.onTextureLoaded();
     });
 
     // Load painting textures — fall back to placeholder if version image is missing
@@ -188,6 +201,7 @@ export class SceneGraphComponent {
     const onLoad = (t: any, i: number) => {
       texArr[i] = this.applyWeave(t.image);
       if (++loaded === PAINTING_COUNT) this.paintingTextures.set([...texArr]);
+      this.onTextureLoaded();
     };
     this.paintings.forEach((p, i) => {
       loader.load(
@@ -252,11 +266,10 @@ export class SceneGraphComponent {
           scene.fog.color.setHex(preset.fogHex);
         }
       }
-
-      // NgtCanvas defaults to lookAt(0,0,0); reset to look forward on first frame
+      
       if (!this.cameraInitialized) {
         this.cameraInitialized = true;
-        this.euler.set(0, 0, 0);
+        this.euler.set(0, Math.PI / 2, 0);
         camera.quaternion.setFromEuler(this.euler);
       }
 
@@ -482,8 +495,8 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 11px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.font = `300 17px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillText('HERITAGE COLLECTION', S / 2, S * 0.11);
     ctx.restore();
 
@@ -525,18 +538,18 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 16px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillText('JavaScript MVC Framework', S / 2, ruleY + S * 0.055);
+    ctx.font = `300 24px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillText('JavaScript MVC Framework', S / 2, ruleY + S * 0.065);
     ctx.restore();
 
     // Date
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 13px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillText('2010  ·  2022', S / 2, ruleY + S * 0.055 + S * 0.04);
+    ctx.font = `300 19px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText('2010  ·  2022', S / 2, ruleY + S * 0.065 + S * 0.045);
     ctx.restore();
 
     // Curator paragraph
@@ -550,8 +563,8 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 14px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.font = `300 20px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
     cuLines.forEach((line, i) => ctx.fillText(line, S / 2, cuStartY + i * cuLH));
     ctx.restore();
 
@@ -559,8 +572,8 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 11px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.font = `300 17px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillText('angularjs.org', S / 2, S * 0.93);
     ctx.restore();
   }
@@ -585,15 +598,16 @@ export class SceneGraphComponent {
         .then(r => r.json())
         .then((data: { login: string }[]) => data.map(c => c.login))
         .catch(() => FALLBACK_CONTRIBUTORS),
-    ]).then(([,, contributors]) => {
-      this.drawCreditsDesign(ctx, S, (contributors as string[]));
+      this.loadImage('/asset/logo.png').catch(() => null),
+    ]).then(([,, contributors, gifImg]) => {
+      this.drawCreditsDesign(ctx, S, (contributors as string[]), gifImg as HTMLImageElement | null);
       tex.needsUpdate = true;
     });
 
     return tex;
   }
 
-  private drawCreditsDesign(ctx: CanvasRenderingContext2D, S: number, contributors: string[]): void {
+  private drawCreditsDesign(ctx: CanvasRenderingContext2D, S: number, contributors: string[], img: HTMLImageElement | null): void {
     const R = 'Roboto, Arial, sans-serif';
 
     ctx.fillStyle = '#fafafa';
@@ -603,15 +617,19 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 11px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.38)';
-    ctx.fillText('ANGULAR ART GALLERY', S / 2, S * 0.11);
+    ctx.font = `300 17px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText('ANGULAR HERITAGE GALLERY', S / 2, S * 0.11);
     ctx.restore();
 
-    // Angular shield — dark on light background
-
+    // Angular logo
+    if (img) {
+      const logoSize = S * 0.22;
+      ctx.drawImage(img, (S - logoSize) / 2, S * 0.17, logoSize, logoSize);
+    }
+    
     // Thin rule
-    const ruleY = S * 0.46;
+    const ruleY = S * 0.40;
     ctx.save();
     const rg = ctx.createLinearGradient((S - 180) / 2, 0, (S + 180) / 2, 0);
     rg.addColorStop(0, 'rgba(0,0,0,0)');
@@ -625,42 +643,36 @@ export class SceneGraphComponent {
     ctx.stroke();
     ctx.restore();
 
+
     // "Angular Community" heading
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 18px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillText('Made with love by Angular Community', S / 2, ruleY + S * 0.055);
+    ctx.font = `300 27px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillText('Made with love by Angular Community', S / 2, ruleY + S * 0.065);
     ctx.restore();
-
-  
-
-
-
-
-    
 
     // Contributors label
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 11px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.38)';
-    ctx.fillText('CONTRIBUTORS', S / 2, ruleY + S * 0.055 + S * 0.048);
+    ctx.font = `300 17px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillText('CONTRIBUTORS', S / 2, ruleY + S * 0.12);
     ctx.restore();
 
     // Contributors 4-column grid
     const COLS = 4;
     const colW = (S * 0.82) / COLS;
     const gridLeft = S * 0.09;
-    const rowH = S * 0.065;
-    const listStartY = ruleY + S * 0.055 + S * 0.12;
+    const rowH = S * 0.052;
+    const listStartY = ruleY + S * 0.18;
     ctx.save();
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.font = `300 13px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.78)';
+    ctx.font = `300 18px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
     contributors.forEach((name, i) => {
       const col = i % COLS;
       const row = Math.floor(i / COLS);
@@ -689,8 +701,8 @@ export class SceneGraphComponent {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `300 11px ${R}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.font = `300 17px ${R}`;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillText('2026', S / 2, rule2Y + S * 0.055 + S * 0.04);
     ctx.restore();
   }

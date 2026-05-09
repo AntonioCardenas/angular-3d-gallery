@@ -10,11 +10,12 @@
     <div #instructions class="instructions-card">
 
       <!-- Back link -->
-      <a class="back-link" (click)="exitGallery(); $event.stopPropagation()" (keydown.enter)="exitGallery()" tabindex="0">
+      <a class="back-link" (click)="exitGallery(); $event.stopPropagation()" (keydown.enter)="exitGallery()"
+        tabindex="0">
         ← Back
       </a>
 
-      <h1 class="instructions-title">Immersive Digital Art Gallery</h1>
+      <h1 class="instructions-title">Angular History Showcase</h1>
       <div class="instructions-body">
         <p class="instructions-subtitle">
           @if (isMobile()) {
@@ -38,11 +39,11 @@
           <span class="settings-label">Lighting</span>
           <div class="lighting-grid">
             @for (p of lighting.presets; track p.id) {
-              <button class="light-btn" [class.active]="lighting.activeId() === p.id"
-                (click)="lighting.setPreset(p.id); $event.stopPropagation()">
-                <span class="light-dot" [style.background]="p.dotColor"></span>
-                {{ p.name }}
-              </button>
+            <button class="light-btn" [class.active]="lighting.activeId() === p.id"
+              (click)="lighting.setPreset(p.id); $event.stopPropagation()">
+              <span class="light-dot" [style.background]="p.dotColor"></span>
+              {{ p.name }}
+            </button>
             }
           </div>
         </div>
@@ -59,11 +60,11 @@
               Steps: {{ audio.stepSoundEnabled() ? 'ON' : 'OFF' }}
             </button>
           </div>
-          
+
           <div class="volume-control" (click)="$event.stopPropagation()">
             <span class="volume-label">Vol: {{ audio.volume() }}%</span>
-            <input type="range" min="0" max="100" [value]="audio.volume()" 
-              (input)="onVolumeChange($event)" class="volume-slider">
+            <input type="range" min="0" max="100" [value]="audio.volume()" (input)="onVolumeChange($event)"
+              class="volume-slider">
           </div>
         </div>
 
@@ -101,4 +102,13 @@
 
   <!-- Gallery Modal -->
   <app-gallery-modal />
+
+  <!-- Preloader -->
+  @if (!preloaderHidden()) {
+  <div #preloader class="preloader">
+    <img class="preloader-logo" src="/asset/logo.png" alt="Angular" />
+    <div class="preloader-spinner"></div>
+    <p class="preloader-text">Loading</p>
+  </div>
+  }
 </main>

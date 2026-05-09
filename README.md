@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/asset/angularjs.svg" alt="Angular Art Gallery Logo" width="120" />
+  <img src="public/asset/angular.gif" alt="Angular Art Gallery Logo" width="120" />
 </p>
 
 <h1 align="center">Angular Art Gallery</h1>
