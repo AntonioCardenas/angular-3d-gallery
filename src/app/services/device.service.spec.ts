@@ -1,60 +1,75 @@
-import { TestBed } from '@angular/core/testing';
+import { test, expect, describe, vi } from '../../test-setup/fixtures';
 import { DeviceService } from './device.service';
 
+/**
+ * DeviceService tests — Browser Mode (Playwright).
+ *
+ * Migrated from TestBed + JSDOM hacks (Object.defineProperty on navigator/window)
+ * to the extended `test` with Angular fixtures.
+ *
+ * In Browser Mode (Playwright/Chromium), `matchMedia` and `navigator` are real
+ * browser APIs. We still mock them for controlled assertions, but through
+ * vi.spyOn instead of fragile Object.defineProperty overrides.
+ *
+ * Key improvements:
+ *   - No mutable `let matchMediaMock` / `let originalTouchPoints` shared state.
+ *   - Fixtures handle TestBed lifecycle (auto-cleanup via onCleanup).
+ *   - `mockReset: true` in vitest.config.ts prevents spy bleeding.
+ */
 describe('DeviceService', () => {
-  let matchMediaMock: any;
-  let originalTouchPoints: number;
+  test('should detect mobile when maxTouchPoints is > 0', ({ angularEnv }) => {
+    // Stub navigator.maxTouchPoints for this test
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      maxTouchPoints: 1,
+    });
 
-  beforeEach(() => {
-    // Guardar original
-    originalTouchPoints = navigator.maxTouchPoints;
+    const service = angularEnv.inject(DeviceService);
+    expect(service.isMobile()).toBe(true);
+  });
 
-    // Crear mock de matchMedia
-    matchMediaMock = vi.fn().mockImplementation(query => ({
-      matches: false,
+  test('should detect mobile when matchMedia pointer is coarse', ({ angularEnv }) => {
+    // Stub maxTouchPoints to 0 so only matchMedia matters
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      maxTouchPoints: 0,
+    });
+
+    // Stub matchMedia to report coarse pointer
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(pointer: coarse)',
       media: query,
       onchange: null,
-      addListener: vi.fn(), // Deprecated
-      removeListener: vi.fn(), // Deprecated
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     }));
 
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: matchMediaMock
+    const service = angularEnv.inject(DeviceService);
+    expect(service.isMobile()).toBe(true);
+  });
+
+  test('should detect desktop when no touch points and fine pointer', ({ angularEnv }) => {
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      maxTouchPoints: 0,
     });
 
-    TestBed.configureTestingModule({});
-  });
-
-  afterEach(() => {
-    // Restaurar original
-    Object.defineProperty(navigator, 'maxTouchPoints', { value: originalTouchPoints, writable: true });
-  });
-
-  it('should detect mobile when maxTouchPoints is > 0', () => {
-    Object.defineProperty(navigator, 'maxTouchPoints', { value: 1, writable: true });
-    
-    const service = TestBed.inject(DeviceService);
-    expect(service.isMobile()).toBe(true);
-  });
-
-  it('should detect mobile when matchMedia pointer is coarse', () => {
-    Object.defineProperty(navigator, 'maxTouchPoints', { value: 0, writable: true });
-    matchMediaMock.mockImplementation((query: string) => ({
-      matches: query === '(pointer: coarse)',
+    // Default matchMedia returns matches: false (fine pointer)
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     }));
 
-    const service = TestBed.inject(DeviceService);
-    expect(service.isMobile()).toBe(true);
-  });
-
-  it('should detect desktop when no touch points and fine pointer', () => {
-    Object.defineProperty(navigator, 'maxTouchPoints', { value: 0, writable: true });
-    
-    const service = TestBed.inject(DeviceService);
+    const service = angularEnv.inject(DeviceService);
     expect(service.isMobile()).toBe(false);
   });
 });

@@ -1,18 +1,32 @@
-import { TestBed } from '@angular/core/testing';
+import { render } from 'vitest-browser-angular';
+import { test, expect, describe } from '../test-setup/fixtures';
 import { App } from './app';
 
+/**
+ * App root component tests — Browser Mode (Playwright).
+ *
+ * Migrated from TestBed-only pattern to `render` (vitest-browser-angular).
+ * Uses extended `test` from our fixtures for consistent Angular environment.
+ *
+ * Since App uses RouterOutlet, we render it `withRouting: true` which
+ * creates a wildcard route and navigates to `/`.
+ */
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
+  test('should create the app', async () => {
+    const { fixture } = await render(App, {
+      withRouting: true,
+    });
+
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
+  test('should render a router-outlet in the DOM', async () => {
+    const { container } = await render(App, {
+      withRouting: true,
+    });
 
-  // Test autogenerado eliminado porque la app ya no renderiza un h1 con el título
+    // In real browser mode, verify the component rendered its template
+    const routerOutlet = container.querySelector('router-outlet');
+    expect(routerOutlet).toBeTruthy();
+  });
 });

@@ -14,11 +14,16 @@ export class SettingsService {
     this.useWebGPU.update(v => !v);
     localStorage.setItem('useWebGPU', String(this.useWebGPU()));
     // NgtCanvas doesn't hot-swap renderers — reload so the new GL factory takes effect.
-    window.location.reload();
+    this.reloadPage();
   }
 
   toggleFPS(): void {
     this.showFPS.update(v => !v);
     localStorage.setItem('showFPS', String(this.showFPS()));
+  }
+
+  /** Isolated for testability — window.location.reload is non-configurable in real browsers */
+  protected reloadPage(): void {
+    window.location.reload();
   }
 }
