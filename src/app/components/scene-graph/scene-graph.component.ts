@@ -47,7 +47,11 @@ extend({
 const MOVE_SPEED = 38.0;
 const DRAG = 10.0;
 const GRAVITY = 9.8 * 7.0;
-const JUMP_HEIGHT = 1.75;
+const STAND_HEIGHT = 1.75;
+const PRONE_HEIGHT = 0.85;
+const JUMP_VELOCITY = 11.0;
+const PRONE_SPEED_MULT = 0.5;
+const HEIGHT_LERP_RATE = 12.0;
 
 const YAW_SPEED = 2.2;
 const PITCH_SPEED = 1.6;
@@ -146,9 +150,11 @@ export class SceneGraphComponent {
   private velocity = new Vector3();
   private keyState = {
     forward: false, backward: false, left: false, right: false,
+    jump: false, prone: false,
   };
   private euler = new Euler(0, 0, 0, 'YXZ');
   private cameraInitialized = false;
+  private currentEyeHeight = STAND_HEIGHT;
 
   // Scratch variables for physics
   private _forward = new Vector3();
@@ -244,10 +250,18 @@ export class SceneGraphComponent {
     document.addEventListener('keydown', (e) => {
       const k = keyMap[e.code];
       if (k) this.keyState[k] = true;
+      if (e.code === 'Space') { this.keyState.jump = true; e.preventDefault(); }
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyC') {
+        this.keyState.prone = true;
+      }
     });
     document.addEventListener('keyup', (e) => {
       const k = keyMap[e.code];
       if (k) this.keyState[k] = false;
+      if (e.code === 'Space') this.keyState.jump = false;
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyC') {
+        this.keyState.prone = false;
+      }
     });
 
     // Render loop — player movement + touch look
@@ -301,15 +315,26 @@ export class SceneGraphComponent {
       const bwd = this.keyState.backward || this.input.backward();
       const lft = this.keyState.left || this.input.left();
       const rgt = this.keyState.right || this.input.right();
+      const jmp = this.keyState.jump || this.input.jump();
+      const prone = this.keyState.prone || this.input.prone();
 
-      if (fwd) this.velocity.z -= MOVE_SPEED * delta;
-      if (bwd) this.velocity.z += MOVE_SPEED * delta;
-      if (lft) this.velocity.x -= MOVE_SPEED * delta;
-      if (rgt) this.velocity.x += MOVE_SPEED * delta;
+      const targetEyeHeight = prone ? PRONE_HEIGHT : STAND_HEIGHT;
+      this.currentEyeHeight += (targetEyeHeight - this.currentEyeHeight) * (1 - Math.exp(-HEIGHT_LERP_RATE * delta));
+
+      const grounded = camera.position.y <= this.currentEyeHeight + 0.01 && this.velocity.y <= 0;
+      if (jmp && grounded && !prone) {
+        this.velocity.y = JUMP_VELOCITY;
+      }
+
+      const speedMul = prone ? PRONE_SPEED_MULT : 1.0;
+      if (fwd) this.velocity.z -= MOVE_SPEED * speedMul * delta;
+      if (bwd) this.velocity.z += MOVE_SPEED * speedMul * delta;
+      if (lft) this.velocity.x -= MOVE_SPEED * speedMul * delta;
+      if (rgt) this.velocity.x += MOVE_SPEED * speedMul * delta;
 
       const moving = (fwd || bwd || lft || rgt) &&
         (Math.abs(this.velocity.x) + Math.abs(this.velocity.z)) > 0.3;
-      if (moving) this.audio.playStep();
+      if (moving && grounded) this.audio.playStep();
 
       this._forward.set(0, 0, -1).applyQuaternion(camera.quaternion);
       this._forward.y = 0;
@@ -323,9 +348,9 @@ export class SceneGraphComponent {
       camera.position.addScaledVector(this._forward, -this.velocity.z * delta);
       camera.position.y += this.velocity.y * delta;
 
-      if (camera.position.y < JUMP_HEIGHT) {
+      if (camera.position.y < this.currentEyeHeight) {
         this.velocity.y = 0;
-        camera.position.y = JUMP_HEIGHT;
+        camera.position.y = this.currentEyeHeight;
       }
 
       // Bounds

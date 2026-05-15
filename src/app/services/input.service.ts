@@ -7,6 +7,8 @@ export class InputService {
   backward = signal(false);
   left = signal(false);
   right = signal(false);
+  jump = signal(false);
+  prone = signal(false);
 
   // Look signals (for touch controls)
   lookX = signal(0);
@@ -33,6 +35,14 @@ export class InputService {
 
   setRight(active: boolean): void {
     if (this.right() !== active) this.right.set(active);
+  }
+
+  setJump(active: boolean): void {
+    if (this.jump() !== active) this.jump.set(active);
+  }
+
+  setProne(active: boolean): void {
+    if (this.prone() !== active) this.prone.set(active);
   }
 
   setLook(x: number, y: number): void {
